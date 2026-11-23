@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+/* ---------- Design tokens ---------- */
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+
+  /* Semantic colors resolve to CSS variables so light/dark swap in one place. */
+  --color-bg: var(--pd-bg);
+  --color-surface: var(--pd-surface);
+  --color-surface-2: var(--pd-surface-2);
+  --color-line: var(--pd-line);
+  --color-ink: var(--pd-ink);
+  --color-ink-2: var(--pd-ink-2);
+  --color-ink-3: var(--pd-ink-3);
+  --color-accent: var(--pd-accent);
+  --color-accent-ink: var(--pd-accent-ink);
+
+  /* Layout constants, shared with JS-free CSS calc()s below */
+  --spacing-tabbar: 3.5rem;
+  --spacing-mini: 4rem;
+}
+
+:root {
+  color-scheme: light dark;
+  --pd-bg: #f4f5f9;
+  --pd-surface: #ffffff;
+  --pd-surface-2: #e7e9f1;
+  --pd-line: rgb(20 25 45 / 0.1);
+  --pd-ink: #161925;
+  --pd-ink-2: #4f5568;
+  --pd-ink-3: #8a90a3;
+  --pd-accent: #5b4bdb;
+  --pd-accent-ink: #ffffff;
+
+  /* Safe areas, with fallbacks for browsers that don't support env() */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pd-bg: #0f1115;
+    --pd-surface: #171a21;
+    --pd-surface-2: #222631;
+    --pd-line: rgb(230 235 255 / 0.08);
+    --pd-ink: #eef0f6;
+    --pd-ink-2: #a6abbb;
+    --pd-ink-3: #6c7285;
+    --pd-accent: #8b7cff;
+    --pd-accent-ink: #0f0b2a;
+  }
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    background: var(--pd-bg);
+    color: var(--pd-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    /* Stop the whole app rubber-banding in standalone mode; inner panes still scroll. */
+    overscroll-behavior: none;
+    overflow: hidden;
+  }
+
+  /* Native-feeling: no text selection / callouts on UI chrome. Content views re-enable as needed. */
+  button,
+  nav,
+  [data-chrome] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--pd-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- Utilities for safe areas ---------- */
+@utility pt-safe {
+  padding-top: var(--sat);
+}
+@utility pb-safe {
+  padding-bottom: var(--sab);
+}
+@utility px-safe {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+@utility h-dvh-safe {
+  height: 100dvh;
+}
+
+/* ---------- Motion ---------- */
+@keyframes pd-eq {
+  0%, 100% { height: 30%; }
+  50% { height: 100%; }
+}
+.pd-eq {
+  height: 60%;
+  animation: pd-eq 0.9s ease-in-out infinite;
+}
+@keyframes pd-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes pd-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pd-pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@utility pd-sheet-in {
+  animation: pd-sheet-in 0.32s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+@utility pd-fade-in {
+  animation: pd-fade-in 0.2s ease-out;
+}
+@utility pd-pop-in {
+  animation: pd-pop-in 0.22s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-eq, .pd-sheet-in, .pd-fade-in, .pd-pop-in { animation: none; }
+}
+
+/* ---------- Range input (scrubber / volume) ---------- */
+.pd-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  cursor: pointer;
+  touch-action: none;
+}
+.pd-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--pd-fill, var(--pd-ink)) var(--pd-pct, 0%), var(--pd-line) var(--pd-pct, 0%));
+}
+.pd-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--pd-fill, var(--pd-ink)) var(--pd-pct, 0%), var(--pd-line) var(--pd-pct, 0%));
+}
+.pd-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 999px;
+  background: var(--pd-fill, var(--pd-ink));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  transition: transform 0.12s;
+}
+.pd-range:active::-webkit-slider-thumb { transform: scale(1.35); }
+.pd-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pd-fill, var(--pd-ink));
+}
+.pd-range:disabled { cursor: default; opacity: 0.4; }
